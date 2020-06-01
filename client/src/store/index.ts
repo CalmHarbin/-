@@ -2,7 +2,7 @@ import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 // 自动导入 modules
-let requireModules = require.context('./modules', true, /.*\.js$/)
+let requireModules = require.context('./modules', true, /.*\.(js|ts)$/)
 let Modules = {}
 
 requireModules.keys().forEach(function(fileName) {

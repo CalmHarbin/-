@@ -1,7 +1,7 @@
 import Taro, { Component, Config } from '@tarojs/taro'
 import { Provider } from '@tarojs/redux'
 
-import Index from '@/views/index/index'
+import Home from '@/views/home/home'
 
 import configStore from './store'
 
@@ -24,7 +24,7 @@ class App extends Component {
      * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
      */
     config: Config = {
-        pages: ['views/home/home', 'views/add/add', 'views/index/index'],
+        pages: ['views/home/home', 'views/add/add'],
         window: {
             backgroundTextStyle: 'light',
             navigationBarTitleText: 'WeChat',
@@ -50,7 +50,7 @@ class App extends Component {
     render() {
         return (
             <Provider store={store}>
-                <Index />
+                <Home />
             </Provider>
         )
     }

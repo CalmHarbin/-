@@ -75,3 +75,25 @@
     font-size: 28px;
     color: #999;
 }
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88px;
+    font-size: 38px;
+    .solid {
+        height: 1px;
+        width: 20%;
+        background-color: #ebedf0;
+    }
+    .solid-left {
+        margin-right: 30px;
+    }
+    .solid-right {
+        margin-left: 30px;
+    }
+}
+
+.container-line {
+    height: 600px;
+}

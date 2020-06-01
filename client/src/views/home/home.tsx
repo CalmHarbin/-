@@ -2,6 +2,7 @@ import Taro, { Component, Config } from '@tarojs/taro'
 import { View, Text, Image, Navigator, OpenData } from '@tarojs/components'
 import styles from './home.module.scss'
 import none from '../../assets/none.jpg'
+import * as echarts from '@/wxcomponents/ec-canvas/echarts.js'
 
 export default class Home extends Component {
     /**
@@ -12,7 +13,82 @@ export default class Home extends Component {
      * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
      */
     config: Config = {
-        navigationBarTitleText: '我爱记工资'
+        navigationBarTitleText: '我爱记工资',
+        usingComponents: {
+            'ec-canvas': '../../wxcomponents/ec-canvas/ec-canvas' // 书写第三方组件的相对路径
+        }
+    }
+
+    state = {
+        ecLine: {
+            onInit: this.initLineChart
+        }
+    }
+
+    initLineChart(canvas: any, width: number, height: number) {
+        const chart = echarts.init(canvas, null, {
+            width: width,
+            height: height
+        })
+        canvas.setChart(chart)
+
+        var option = {
+            grid: {
+                top: 30,
+                left: 50,
+                bottom: 30,
+                right: 15
+            },
+            xAxis: {
+                name: '月份',
+                type: 'category',
+                axisTick: {
+                    alignWithLabel: true //名字与刻度线对齐
+                },
+                axisLabel: {
+                    interval: 0 //强制显示所有的刻度
+                },
+                data: [
+                    '一月',
+                    '2月',
+                    '3月',
+                    '4月',
+                    '5月',
+                    '6月',
+                    '7月',
+                    '8月',
+                    '9月',
+                    '10月',
+                    '11月',
+                    '12月'
+                ]
+            },
+            yAxis: {
+                name: '元',
+                type: 'value'
+            },
+            series: [
+                {
+                    data: [
+                        5000,
+                        6100,
+                        8325,
+                        7000,
+                        4200,
+                        5720,
+                        5590,
+                        5990,
+                        6800,
+                        9325,
+                        6250,
+                        5800
+                    ],
+                    type: 'line'
+                }
+            ]
+        }
+        chart.setOption(option)
+        return chart
     }
 
     componentWillMount() {
@@ -82,8 +158,32 @@ export default class Home extends Component {
 
                 {/* 图表 */}
                 <View className={styles.container}>
+                    {/* title */}
+                    <View className={styles.title}>
+                        <View
+                            className={[
+                                styles.solid,
+                                styles['solid-left']
+                            ].join(' ')}
+                        ></View>
+                        <Text>2020年收入统计</Text>
+                        <View
+                            className={[
+                                styles.solid,
+                                styles['solid-right']
+                            ].join(' ')}
+                        ></View>
+                    </View>
+                    {/* 折线图 */}
+                    <View className={styles['container-line']}>
+                        <ec-canvas
+                            id="mychart-dom-line"
+                            canvas-id="mychart-line"
+                            ec={this.state.ecLine}
+                        ></ec-canvas>
+                    </View>
                     {/* 没有记录 */}
-                    <View className={styles.noneBox}>
+                    {/* <View className={styles.noneBox}>
                         <Image
                             mode="widthFix"
                             className={styles.noneJpg}
@@ -92,7 +192,7 @@ export default class Home extends Component {
                         <View className={styles.noneText}>
                             您还没有工资记录哦
                         </View>
-                    </View>
+                    </View> */}
                 </View>
             </View>
         )
