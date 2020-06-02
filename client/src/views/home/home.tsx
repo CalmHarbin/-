@@ -24,15 +24,24 @@ export default class Home extends Component {
             onInit: this.initLineChart
         }
     }
-
+    // 折线图
     initLineChart(canvas: any, width: number, height: number) {
+        const res = Taro.getSystemInfoSync()
+
         const chart = echarts.init(canvas, null, {
+            devicePixelRatio: res.pixelRatio,
             width: width,
             height: height
         })
+
         canvas.setChart(chart)
 
         var option = {
+            tooltip: {
+                show: true,
+                trigger: 'axis',
+                formatter: '{b}: {c}元'
+            },
             grid: {
                 top: 30,
                 left: 50,
@@ -46,70 +55,51 @@ export default class Home extends Component {
                     alignWithLabel: true //名字与刻度线对齐
                 },
                 axisLabel: {
-                    interval: 0 //强制显示所有的刻度
+                    interval: 0, //强制显示所有的刻度
+                    fontSize: 13
                 },
-                data: [
-                    '一月',
-                    '2月',
-                    '3月',
-                    '4月',
-                    '5月',
-                    '6月',
-                    '7月',
-                    '8月',
-                    '9月',
-                    '10月',
-                    '11月',
-                    '12月'
-                ]
+                data: ['1月', '2月', '3月', '4月', '5月', '6月']
             },
             yAxis: {
                 name: '元',
-                type: 'value'
+                type: 'value',
+                axisLabel: {
+                    fontSize: 13
+                },
+                scale: true //不强制显示0
+            },
+            legend: {
+                data: ['账单'], //跟下面的name对应
+                show: true, //写成false不行
+                left: -1000 //为了隐藏
             },
             series: [
                 {
-                    data: [
-                        5000,
-                        6100,
-                        8325,
-                        7000,
-                        4200,
-                        5720,
-                        5590,
-                        5990,
-                        6800,
-                        9325,
-                        6250,
-                        5800
-                    ],
-                    type: 'line'
+                    name: '账单',
+                    data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    type: 'line',
+                    label: {
+                        normal: {
+                            rich: {}
+                        }
+                    },
+                    color: ['#ff5656']
+                },
+                {
+                    name: '账单',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    color: ['#3398DB']
                 }
             ]
         }
+
         chart.setOption(option)
         return chart
     }
 
-    componentWillMount() {
-        Taro.getSetting({
-            success: function(res) {
-                if (!res.authSetting['scope.userInfo']) {
-                    Taro.authorize({
-                        scope: 'scope.userInfo',
-                        success: function() {
-                            // 用户已经同意小程序使用录音功能，后续调用 Taro.startRecord 接口不会弹窗询问
-                            Taro.getUserInfo({
-                                success: function(res) {
-                                    console.log(res)
-                                }
-                            })
-                        }
-                    })
-                }
-            }
-        })
-    }
+    componentWillMount() {}
 
     componentDidMount() {}
 
