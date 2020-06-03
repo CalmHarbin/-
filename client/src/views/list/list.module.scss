@@ -1,0 +1,19 @@
+.list {
+    padding: 30px;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+.item {
+    display: flex;
+    border-radius: 16px;
+    background-color: #ffffff;
+    padding: 20px;
+    font-size: 30px;
+    margin-bottom: 20px;
+    .label {
+        margin-right: auto;
+    }
+    .value {
+        margin-right: 6px;
+    }
+}

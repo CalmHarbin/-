@@ -3,6 +3,8 @@ import { View, Text, Image, Navigator, OpenData } from '@tarojs/components'
 import styles from './home.module.scss'
 import none from '../../assets/none.jpg'
 import * as echarts from '@/wxcomponents/ec-canvas/echarts.js'
+import { $_GetDateTime, $_deepCompare } from '@/units/index'
+import BaseActionsheet from '@/components/BaseActionsheet/BaseActionsheet'
 
 export default class Home extends Component {
     /**
@@ -21,9 +23,41 @@ export default class Home extends Component {
 
     state = {
         ecLine: {
-            onInit: this.initLineChart
-        }
+            // onInit: this.initLineChart,
+            lazyLoad: true // 延迟加载
+        },
+        list: [],
+        total: 0, //总收入
+        columns: [], //年份选择
+        index: 0, //当前选中年份
+        show: false
     }
+
+    //首次加载触发
+    componentDidMount() {
+        let columns: number[] = []
+        let curYear = new Date().getFullYear()
+        for (let i = 2018; i <= curYear; i++) {
+            columns.push(i)
+        }
+        this.setState(
+            {
+                columns,
+                index: columns.length - 1
+            },
+            () => {
+                this.getList()
+            }
+        )
+    }
+
+    //页面显示时触发
+    componentDidShow() {
+        if (this.state.columns.length === 0) return
+        //查询数据
+        this.getList()
+    }
+
     // 折线图
     initLineChart(canvas: any, width: number, height: number) {
         const res = Taro.getSystemInfoSync()
@@ -34,8 +68,12 @@ export default class Home extends Component {
             height: height
         })
 
-        canvas.setChart(chart)
+        interface row {
+            date: Date
+            realGain: number
+        }
 
+        canvas.setChart(chart)
         var option = {
             tooltip: {
                 show: true,
@@ -58,15 +96,18 @@ export default class Home extends Component {
                     interval: 0, //强制显示所有的刻度
                     fontSize: 13
                 },
-                data: ['1月', '2月', '3月', '4月', '5月', '6月']
+                // data: ['1月', '2月', '3月', '4月', '5月', '6月']
+                data: this.state.list.map((item: row) => {
+                    return `${$_GetDateTime(new Date(item.date), 'm')}月`
+                })
             },
             yAxis: {
                 name: '元',
                 type: 'value',
                 axisLabel: {
                     fontSize: 13
-                },
-                scale: true //不强制显示0
+                }
+                // scale: true //不强制显示0
             },
             legend: {
                 data: ['账单'], //跟下面的name对应
@@ -76,7 +117,10 @@ export default class Home extends Component {
             series: [
                 {
                     name: '账单',
-                    data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    // data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    data: this.state.list.map((item: row) => {
+                        return item.realGain
+                    }),
                     type: 'line',
                     label: {
                         normal: {
@@ -88,8 +132,24 @@ export default class Home extends Component {
                 {
                     name: '账单',
                     type: 'bar',
-                    barWidth: '60%',
-                    data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    barMaxWidth: 50,
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: true, //开启显示
+                                position: 'top', //在上方显示
+                                textStyle: {
+                                    //数值样式
+                                    color: 'black',
+                                    fontSize: 16
+                                }
+                            }
+                        }
+                    },
+                    // data: [5000, 6100, 8325, 7000, 4200, 5720],
+                    data: this.state.list.map((item: row) => {
+                        return item.realGain
+                    }),
                     color: ['#3398DB']
                 }
             ]
@@ -99,17 +159,84 @@ export default class Home extends Component {
         return chart
     }
 
-    componentWillMount() {}
-
-    componentDidMount() {}
-
-    componentWillUnmount() {}
-
-    componentDidShow() {}
-
-    componentDidHide() {}
+    getList() {
+        Taro.showLoading({
+            title: '加载中',
+            mask: true
+        })
+        //调用云函数
+        Taro.cloud
+            .callFunction({
+                // 云函数名称
+                name: 'getList',
+                // 传给云函数的参数
+                data: {
+                    startTime: new Date(
+                        `${this.state.columns[this.state.index]}/01/01 00:00:00`
+                    ).getTime(),
+                    endTime: new Date(
+                        `${this.state.columns[this.state.index]}/12/31 23:59:59`
+                    ).getTime()
+                }
+            })
+            .then(res => {
+                console.log(167, res)
+                Taro.hideLoading()
+                // 如果数据没有变化则不重新绘图
+                if ($_deepCompare(this.state.list, res.result)) return
+                if (res.result.length) {
+                    this.setState(
+                        {
+                            list: res.result,
+                            total: (res.result as any[]).reduce((acc, cur) => {
+                                if (typeof acc === 'number') {
+                                    return acc + cur.realGain
+                                } else {
+                                    return acc.realGain + cur.realGain
+                                }
+                            })
+                        },
+                        () => {
+                            //实例化图标
+                            this.$scope
+                                .selectComponent('#mychart-dom-line')
+                                .init(this.initLineChart.bind(this))
+                        }
+                    )
+                } else {
+                    this.setState({
+                        list: [],
+                        total: 0
+                    })
+                }
+            })
+    }
 
     render() {
+        let content
+        if (this.state.list.length) {
+            // 图表
+            content = (
+                <View className={styles['container-line']}>
+                    <ec-canvas
+                        id="mychart-dom-line"
+                        canvas-id="mychart-line"
+                        ec={this.state.ecLine}
+                    ></ec-canvas>
+                </View>
+            )
+        } else {
+            content = (
+                <View className={styles.noneBox}>
+                    <Image
+                        mode="widthFix"
+                        className={styles.noneJpg}
+                        src={none}
+                    />
+                    <View className={styles.noneText}>您还没有工资记录哦</View>
+                </View>
+            )
+        }
         return (
             <View className="home">
                 {/* 头部 */}
@@ -119,10 +246,19 @@ export default class Home extends Component {
                             className={styles.avatar}
                             src="https://wework.qpic.cn/bizmail/iamP91D7fgE9Qwoy5o7NdRC2jichpoURDaIwRbK8oOCbSxfz9uT9kfeA/0"
                         /> */}
-                        <OpenData
-                            className={styles.avatar}
-                            type="userAvatarUrl"
-                        />
+                        <View
+                            className={styles['avatar-box']}
+                            onClick={() =>
+                                Taro.navigateTo({
+                                    url: '/views/list/list'
+                                })
+                            }
+                        >
+                            <OpenData
+                                className={styles.avatar}
+                                type="userAvatarUrl"
+                            />
+                        </View>
 
                         <View className={styles.right}>
                             {/* <Text className={styles.name}>张林</Text> */}
@@ -142,7 +278,9 @@ export default class Home extends Component {
 
                     <View className={styles['price-content']}>
                         <Text className={styles.label}>年度总收入</Text>
-                        <Text className={styles.price}>￥100.00</Text>
+                        <Text className={styles.price}>
+                            ￥{this.state.total}
+                        </Text>
                     </View>
                 </View>
 
@@ -156,7 +294,15 @@ export default class Home extends Component {
                                 styles['solid-left']
                             ].join(' ')}
                         ></View>
-                        <Text>2020年收入统计</Text>
+                        <Text
+                            onClick={() => {
+                                this.setState({
+                                    show: true
+                                })
+                            }}
+                        >
+                            {this.state.columns[this.state.index]}年收入统计
+                        </Text>
                         <View
                             className={[
                                 styles.solid,
@@ -164,26 +310,29 @@ export default class Home extends Component {
                             ].join(' ')}
                         ></View>
                     </View>
-                    {/* 折线图 */}
-                    <View className={styles['container-line']}>
-                        <ec-canvas
-                            id="mychart-dom-line"
-                            canvas-id="mychart-line"
-                            ec={this.state.ecLine}
-                        ></ec-canvas>
-                    </View>
-                    {/* 没有记录 */}
-                    {/* <View className={styles.noneBox}>
-                        <Image
-                            mode="widthFix"
-                            className={styles.noneJpg}
-                            src={none}
-                        />
-                        <View className={styles.noneText}>
-                            您还没有工资记录哦
-                        </View>
-                    </View> */}
+                    {content}
                 </View>
+                {/* 年份选择 */}
+                <BaseActionsheet
+                    show={this.state.show}
+                    columns={this.state.columns}
+                    default_index={this.state.index}
+                    onConfirm={(value, index) => {
+                        this.setState(
+                            {
+                                index: index
+                            },
+                            () => {
+                                this.getList()
+                            }
+                        )
+                    }}
+                    onInput={state => {
+                        this.setState({
+                            show: state
+                        })
+                    }}
+                />
             </View>
         )
     }

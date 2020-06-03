@@ -1,5 +1,5 @@
 // 云函数入口文件
-const cloud = require('wx-server-sdk')
+const cloud = require("wx-server-sdk")
 
 cloud.init()
 
@@ -7,25 +7,28 @@ cloud.init()
 exports.main = async (event, context) => {
     const wxContext = cloud.getWXContext()
 
-    let { date, deserved, RealGain, remark } = event
+    let { date, deserved, realGain, remark } = event
     let openid = wxContext.OPENID
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         //先查询是否存在
-        let db = cloud.database().collection('user')
-        db.where({
-            openid,
-            date,
-        })
+        let db = cloud.database()
+        let collection = db.collection("user")
+        collection
+            .where({
+                openid,
+                date,
+            })
             .get()
-            .then(row => {
+            .then((row) => {
                 if (row.data.length) {
                     //修改
-                    db.doc(row.data[0]._id)
+                    collection
+                        .doc(row.data[0]._id)
                         .update({
                             data: {
                                 deserved,
-                                RealGain,
+                                realGain,
                                 remark,
                             },
                         })
@@ -34,17 +37,19 @@ exports.main = async (event, context) => {
                         })
                 } else {
                     //添加一条数据
-                    db.add({
-                        data: {
-                            openid,
-                            date,
-                            deserved,
-                            RealGain,
-                            remark,
-                        },
-                    }).then(res => {
-                        resolve()
-                    })
+                    collection
+                        .add({
+                            data: {
+                                openid,
+                                date,
+                                deserved,
+                                realGain,
+                                remark,
+                            },
+                        })
+                        .then((res) => {
+                            resolve()
+                        })
                 }
             })
     })

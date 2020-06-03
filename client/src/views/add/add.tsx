@@ -14,7 +14,7 @@ export default class Add extends Component {
      * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
      */
     config: Config = {
-        navigationBarTitleText: '添加',
+        navigationBarTitleText: '添加工资',
         usingComponents: {
             'van-cell-group': '../../wxcomponents/vant-weapp/cell-group/index',
             'van-cell': '../../wxcomponents/vant-weapp/cell/index',
@@ -22,12 +22,56 @@ export default class Add extends Component {
             'van-button': '../../wxcomponents/vant-weapp/button/index'
         }
     }
+
     state = {
         show: false,
         date: $_GetDateTime(new Date(), 'Y-m'), //默认当前月
         deserved: '', //应发
-        RealGain: '', //实发
+        realGain: '', //实发
         remark: '' //备注
+    }
+    componentWillMount() {
+        if (this.$router.preload && this.$router.preload.date) {
+            Taro.setNavigationBarTitle({
+                title: '修改工资'
+            })
+            this.setState(
+                {
+                    date: $_GetDateTime(
+                        new Date(this.$router.preload.date),
+                        'Y-m'
+                    )
+                },
+                () => {
+                    this.getData()
+                }
+            )
+        }
+    }
+
+    //获取数据
+    getData() {
+        Taro.showLoading({
+            title: '加载中',
+            mask: true
+        })
+        //调用云函数
+        Taro.cloud
+            .callFunction({
+                // 云函数名称
+                name: 'getOne',
+                data: {
+                    date: this.$router.preload && this.$router.preload.date
+                }
+            })
+            .then((res: any) => {
+                Taro.hideLoading()
+                this.setState({
+                    deserved: res.result.deserved ? res.result.deserved : '',
+                    realGain: res.result.realGain ? res.result.realGain : '',
+                    remark: res.result.remark
+                })
+            })
     }
 
     //提交
@@ -39,13 +83,13 @@ export default class Add extends Component {
                 duration: 2000
             })
         }
-        if (!this.state.RealGain) {
+        if (!this.state.realGain) {
             return Taro.showToast({
                 title: '请输入实发工资',
                 icon: 'none',
                 duration: 2000
             })
-        } else if (Number(this.state.RealGain) < 0) {
+        } else if (Number(this.state.realGain) < 0) {
             return Taro.showToast({
                 title: '实发工资必须大于0',
                 icon: 'none',
@@ -66,15 +110,18 @@ export default class Add extends Component {
                     date: new Date(
                         this.state.date.replace(/-/, '/') + '-01'
                     ).getTime(), //时间存时间戳
-                    deserved: this.state.deserved,
-                    RealGain: this.state.RealGain,
+                    deserved: Number(this.state.deserved),
+                    realGain: Number(this.state.realGain),
                     remark: this.state.remark
                 }
             })
             .then(() => {
                 Taro.hideLoading()
                 Taro.showToast({
-                    title: '添加成功',
+                    title:
+                        this.$router.preload && this.$router.preload.date
+                            ? '修改成功'
+                            : '添加成功',
                     icon: 'success',
                     duration: 2000,
                     complete: () => {
@@ -85,6 +132,14 @@ export default class Add extends Component {
             })
     }
 
+    //改变日期
+    setDate() {
+        if (this.$router.preload && this.$router.preload.date) return
+        this.setState({
+            show: true
+        })
+    }
+
     render() {
         return (
             <View className="add">
@@ -92,13 +147,13 @@ export default class Add extends Component {
                     <van-cell
                         title="日期"
                         value={this.state.date ? this.state.date : '请选择'}
-                        is-link
+                        is-link={
+                            this.$router.preload && this.$router.preload.date
+                                ? false
+                                : true
+                        }
                         required
-                        onClick={() => {
-                            this.setState({
-                                show: true
-                            })
-                        }}
+                        onClick={this.setDate.bind(this)}
                     />
                     <van-field
                         label="应发工资"
@@ -118,10 +173,10 @@ export default class Add extends Component {
                         placeholder="请输入"
                         input-align="right"
                         type="digit"
-                        value={this.state.RealGain}
+                        value={this.state.realGain}
                         onChange={event => {
                             this.setState({
-                                RealGain: event.detail
+                                realGain: event.detail
                             })
                         }}
                     />
@@ -132,6 +187,7 @@ export default class Add extends Component {
                         placeholder="请输入"
                         autosize
                         border={false}
+                        autosize={{ minHeight: 70 }}
                     />
                 </van-cell-group>
 
@@ -141,7 +197,7 @@ export default class Add extends Component {
                         block
                         onClick={this.submit.bind(this)}
                     >
-                        提交
+                        {this.$router.preload.date ? '确认修改' : '提交'}
                     </van-button>
                 </View>
 
