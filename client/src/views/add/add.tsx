@@ -1,11 +1,22 @@
 import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import { View } from '@tarojs/components'
 import styles from './add.module.scss'
 
 import BaseDatetimePicker from '@/components/BaseDatetimePicker/BaseDatetimePicker'
 import { $_GetDateTime } from '@/units/index'
 
-export default class Add extends Component {
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'van-cell-group': any
+            'van-cell': any
+            'van-field': any
+            'van-button': any
+        }
+    }
+}
+
+class Add extends Component {
     /**
      * 指定config的类型声明为: Taro.Config
      *
@@ -185,7 +196,6 @@ export default class Add extends Component {
                         label="备注"
                         type="textarea"
                         placeholder="请输入"
-                        autosize
                         border={false}
                         autosize={{ minHeight: 70 }}
                     />
@@ -197,7 +207,9 @@ export default class Add extends Component {
                         block
                         onClick={this.submit.bind(this)}
                     >
-                        {this.$router.preload.date ? '确认修改' : '提交'}
+                        {this.$router.preload && this.$router.preload.date
+                            ? '确认修改'
+                            : '提交'}
                     </van-button>
                 </View>
 
@@ -206,7 +218,7 @@ export default class Add extends Component {
                     minDate={new Date('2018/01/01').getTime()}
                     maxDate={Date.now()}
                     show={this.state.show}
-                    time={this.state.date}
+                    time={this.state.date as string}
                     onConfirm={time => {
                         this.setState({
                             date: time
@@ -222,3 +234,5 @@ export default class Add extends Component {
         )
     }
 }
+
+export default Add

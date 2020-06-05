@@ -2,9 +2,23 @@ import Taro, { Component, Config } from '@tarojs/taro'
 import { View, Text, Image, Navigator, OpenData } from '@tarojs/components'
 import styles from './home.module.scss'
 import none from '../../assets/none.jpg'
-import * as echarts from '@/wxcomponents/ec-canvas/echarts.js'
+// import * as echarts from '@/wxcomponents/ec-canvas/echarts.js'
+import * as echarts from '../../wxcomponents/ec-canvas/echarts.js' //此处用相对路径,以免保存不是模块
 import { $_GetDateTime, $_deepCompare } from '@/units/index'
 import BaseActionsheet from '@/components/BaseActionsheet/BaseActionsheet'
+
+//声明自定义组件, 如果很多地方用,写到global.d.ts中去
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'ec-canvas': {
+                id: string
+                'canvas-id': string
+                ec: any
+            }
+        }
+    }
+}
 
 export default class Home extends Component {
     /**
@@ -30,7 +44,8 @@ export default class Home extends Component {
         total: 0, //总收入
         columns: [], //年份选择
         index: 0, //当前选中年份
-        show: false
+        show: false,
+        canvasUrl: ''
     }
 
     //首次加载触发
@@ -59,11 +74,12 @@ export default class Home extends Component {
     }
 
     // 折线图
-    initLineChart(canvas: any, width: number, height: number) {
-        const res = Taro.getSystemInfoSync()
+    initLineChart(canvas: any, width: number, height: number, dpr: number) {
+        // const res = Taro.getSystemInfoSync()
+        // res.pixelRatio
 
         const chart = echarts.init(canvas, null, {
-            devicePixelRatio: res.pixelRatio,
+            devicePixelRatio: dpr,
             width: width,
             height: height
         })
@@ -109,11 +125,11 @@ export default class Home extends Component {
                 }
                 // scale: true //不强制显示0
             },
-            legend: {
-                data: ['账单'], //跟下面的name对应
-                show: true, //写成false不行
-                left: -1000 //为了隐藏
-            },
+            // legend: {
+            //     data: ['账单'], //跟下面的name对应
+            //     show: true, //写成false不行
+            //     left: -1000 //为了隐藏
+            // },
             series: [
                 {
                     name: '账单',
@@ -156,7 +172,20 @@ export default class Home extends Component {
         }
 
         chart.setOption(option)
+
+        setTimeout(this.save.bind(this), 1000)
         return chart
+    }
+    //获取canvas的图片地址
+    save() {
+        const ecComponent = this.$scope.selectComponent('#mychart-dom-line')
+        ecComponent.canvasToTempFilePath({
+            success: res => {
+                this.setState({
+                    canvasUrl: res.tempFilePath
+                })
+            }
+        })
     }
 
     getList() {
@@ -180,21 +209,18 @@ export default class Home extends Component {
                 }
             })
             .then(res => {
-                console.log(167, res)
                 Taro.hideLoading()
                 // 如果数据没有变化则不重新绘图
                 if ($_deepCompare(this.state.list, res.result)) return
-                if (res.result.length) {
+                if ((res.result as any[]).length) {
+                    let total = 0
+                    for (let item of res.result as any[]) {
+                        total += item.realGain
+                    }
                     this.setState(
                         {
                             list: res.result,
-                            total: (res.result as any[]).reduce((acc, cur) => {
-                                if (typeof acc === 'number') {
-                                    return acc + cur.realGain
-                                } else {
-                                    return acc.realGain + cur.realGain
-                                }
-                            })
+                            total: total
                         },
                         () => {
                             //实例化图标
@@ -218,11 +244,33 @@ export default class Home extends Component {
             // 图表
             content = (
                 <View className={styles['container-line']}>
-                    <ec-canvas
-                        id="mychart-dom-line"
-                        canvas-id="mychart-line"
-                        ec={this.state.ecLine}
-                    ></ec-canvas>
+                    <View
+                        className={this.state.show ? styles.show : styles.hide}
+                    >
+                        <Image
+                            mode="widthFix"
+                            className={styles.canvasUrl}
+                            src={this.state.canvasUrl}
+                        />
+                    </View>
+
+                    <View
+                        className={
+                            this.state.show
+                                ? [styles.hide, styles['container-line']].join(
+                                      ' '
+                                  )
+                                : [styles.show, styles['container-line']].join(
+                                      ' '
+                                  )
+                        }
+                    >
+                        <ec-canvas
+                            id="mychart-dom-line"
+                            canvas-id="mychart-line"
+                            ec={this.state.ecLine}
+                        ></ec-canvas>
+                    </View>
                 </View>
             )
         } else {
@@ -237,6 +285,7 @@ export default class Home extends Component {
                 </View>
             )
         }
+
         return (
             <View className="home">
                 {/* 头部 */}
@@ -317,7 +366,7 @@ export default class Home extends Component {
                     show={this.state.show}
                     columns={this.state.columns}
                     default_index={this.state.index}
-                    onConfirm={(value, index) => {
+                    onConfirm={(_value, index) => {
                         this.setState(
                             {
                                 index: index

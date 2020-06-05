@@ -1,7 +1,18 @@
 import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text, Image, Navigator, OpenData } from '@tarojs/components'
+import { View, Image, Text } from '@tarojs/components'
 import styles from './list.module.scss'
 import none from '../../assets/none.jpg'
+
+//声明自定义组件
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'van-icon': {
+                name: string
+            }
+        }
+    }
+}
 
 export default class Home extends Component {
     /**
@@ -47,7 +58,6 @@ export default class Home extends Component {
     }
 
     go(date: number) {
-        console.log('go')
         //传参
         this.$preload({
             date
@@ -58,9 +68,40 @@ export default class Home extends Component {
     }
 
     render() {
+        interface Item {
+            date: number
+            realGain: number
+        }
+        let className = styles.list,
+            noWrap
+        if (this.state.list.length === 0) {
+            className = styles.noList
+            noWrap = (
+                <View className={styles.noneBox}>
+                    <Image
+                        mode="widthFix"
+                        className={styles.noneJpg}
+                        src={none}
+                    />
+                    <View className={styles.noneText}>
+                        您还没有工资记录哦,{' '}
+                        <Text
+                            className={styles.noneTextAdd}
+                            onClick={() =>
+                                Taro.navigateTo({
+                                    url: '/views/add/add'
+                                })
+                            }
+                        >
+                            去添加
+                        </Text>
+                    </View>
+                </View>
+            )
+        }
         return (
-            <View className={styles.list}>
-                {this.state.list.map(item => {
+            <View className={className}>
+                {this.state.list.map((item: Item) => {
                     let year = new Date(item.date).getFullYear()
                     let month = new Date(item.date).getMonth() + 1
                     return (
@@ -79,6 +120,7 @@ export default class Home extends Component {
                         </View>
                     )
                 })}
+                {noWrap}
             </View>
         )
     }

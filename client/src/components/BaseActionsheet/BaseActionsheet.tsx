@@ -1,14 +1,54 @@
 import Taro, { Component, Config } from '@tarojs/taro'
 import { View } from '@tarojs/components'
 
-export default class Login extends Component {
+//声明自定义组件
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'van-popup': {
+                children?: Element
+                show: boolean
+                position: string
+                onClose: () => void
+                'onBefore-enter': () => void
+            }
+            'van-picker': {
+                ref?: string
+                title: string
+                columns: string[]
+                onConfirm: () => void
+                onCancel: () => void
+            }
+        }
+    }
+}
+
+//声明 props
+type PropsType = {
+    show: boolean
+    title: string
+    columns: string[]
+    default_index: number
+    onInput: (state: boolean) => void
+    onConfirm: (value: boolean, index: number) => void
+}
+
+//声明 state
+type StateType = {
+    index: number
+}
+
+interface BaseActionsheet {
+    props: PropsType
+    state: StateType
+}
+
+class BaseActionsheet extends Component {
     static defaultProps = {
         show: false,
         title: '选择时间',
         columns: [],
-        default_index: 0,
-        onInput: Function,
-        onConfirm: Function
+        default_index: 0
     }
 
     config: Config = {
@@ -56,7 +96,7 @@ export default class Login extends Component {
         return (
             <View className="DatetimePicker">
                 <van-popup
-                    show={this.state.show}
+                    show={this.props.show}
                     position="bottom"
                     onClose={this.cancel.bind(this)}
                     onBefore-enter={this.update}
@@ -75,3 +115,5 @@ export default class Login extends Component {
         )
     }
 }
+
+export default BaseActionsheet

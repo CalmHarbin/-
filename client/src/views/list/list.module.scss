@@ -3,6 +3,11 @@
     min-height: 100vh;
     background-color: #f5f5f5;
 }
+.noList {
+    padding: 30px;
+    min-height: 100vh;
+    background-color: #fff;
+}
 .item {
     display: flex;
     border-radius: 16px;
@@ -16,4 +21,21 @@
     .value {
         margin-right: 6px;
     }
+}
+.noneBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 200px;
+}
+.noneJpg {
+    width: 320px;
+}
+.noneText {
+    font-size: 28px;
+    color: #999;
+    margin-top: 40px;
+}
+.noneTextAdd {
+    color: #2d8cf0;
 }

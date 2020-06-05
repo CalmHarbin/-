@@ -1,12 +1,54 @@
 import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text, Button } from '@tarojs/components'
+import { View } from '@tarojs/components'
 
-export default class Login extends Component {
+//声明自定义组件
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'van-popup': {
+                children?: Element
+                show: boolean
+                position: string
+                onClose: () => void
+                'onBefore-enter': () => void
+            }
+            'van-datetime-picker': any
+        }
+    }
+}
+
+//声明 props
+type PropsType = {
+    show: boolean
+    title?: string
+    type?: string
+    time: string
+    minDate?: number
+    maxDate?: number
+    minHour?: number
+    maxHour?: number
+    minMinute?: number
+    maxMinute?: number
+    onInput: (state: boolean) => void
+    onConfirm: (time: string) => void
+}
+
+//声明 state
+type StateType = {
+    formatter_time: string | null
+    currentDate: number
+}
+
+interface BaseDatetimePicker {
+    props: PropsType
+    state: StateType
+}
+
+class BaseDatetimePicker extends Component {
     static defaultProps = {
         show: false,
         title: '选择时间',
         type: 'datetime',
-        time: '',
         minDate: new Date('2010/01/01 00:00').getTime(),
         maxDate: new Date('2036/12/31 23:59').getTime(),
         minHour: 0,
@@ -176,13 +218,13 @@ export default class Login extends Component {
         return (
             <View className="DatetimePicker">
                 <van-popup
-                    show={this.state.show}
+                    show={this.props.show}
                     position="bottom"
                     onClose={this.cancel.bind(this)}
                     onBefore-enter={this.update}
                 >
                     <van-datetime-picker
-                        value={currentDate}
+                        value={this.state.currentDate}
                         ref="datetime"
                         type={this.props.type}
                         title={this.props.title}
@@ -214,3 +256,5 @@ export default class Login extends Component {
         )
     }
 }
+
+export default BaseDatetimePicker
