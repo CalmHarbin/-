@@ -54,6 +54,10 @@ const config = {
             {
                 from: 'src/wxcomponents/vant-weapp/picker-column/index.wxs',
                 to: 'dist/wxcomponents/vant-weapp/picker-column/index.wxs'
+            },
+            {
+                from: 'src/assets/share.png',
+                to: 'dist/assets/share.png'
             }
         ],
         options: {}
@@ -121,7 +125,7 @@ const config = {
     }
 }
 
-module.exports = function (merge) {
+module.exports = function(merge) {
     if (process.env.NODE_ENV === 'development') {
         return merge({}, config, devConfig)
     }

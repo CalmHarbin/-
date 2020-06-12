@@ -29,7 +29,7 @@ export default class Home extends Component {
      * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
      */
     config: Config = {
-        navigationBarTitleText: '我爱记工资',
+        navigationBarTitleText: '我爱记账单',
         usingComponents: {
             'ec-canvas': '../../wxcomponents/ec-canvas/ec-canvas' // 书写第三方组件的相对路径
         }
@@ -71,6 +71,15 @@ export default class Home extends Component {
         if (this.state.columns.length === 0) return
         //查询数据
         this.getList()
+    }
+
+    //页面分享
+    onShareAppMessage() {
+        return {
+            title: '我爱记账单', //转发标题
+            imageUrl: '../../assets/share.png', //转发封面图
+            path: '/views/home/home' //分享路径
+        }
     }
 
     // 折线图
