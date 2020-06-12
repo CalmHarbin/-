@@ -106,6 +106,12 @@ class Add extends Component {
                 icon: 'none',
                 duration: 2000
             })
+        } else if (Number(this.state.realGain) > 99999999) {
+            return Taro.showToast({
+                title: '实发工资必须小于1亿',
+                icon: 'none',
+                duration: 2000
+            })
         }
         Taro.showLoading({
             title: '正在提交',

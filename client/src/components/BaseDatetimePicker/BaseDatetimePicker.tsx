@@ -49,8 +49,8 @@ class BaseDatetimePicker extends Component {
         show: false,
         title: '选择时间',
         type: 'datetime',
-        minDate: new Date('2010/01/01 00:00').getTime(),
-        maxDate: new Date('2036/12/31 23:59').getTime(),
+        minDate: new Date('2010/01/01 00:00:00').getTime(),
+        maxDate: new Date('2036/12/31 23:59:59').getTime(),
         minHour: 0,
         maxHour: 23,
         minMinute: 0,
@@ -95,8 +95,14 @@ class BaseDatetimePicker extends Component {
             currentDate = Date.now() //默认当前时间
         } else {
             formatter_time = this.props.time.replace(/-/g, '/') //防止格式不统一  2019-12-12  和 2019/12/12
-            currentDate = new Date(formatter_time).getTime() //将时间转一下格式
+            //这里得判断下值,ios传入年月  new Date('2020/01').getTime() 会得到NAN
+            if (this.props.type === 'year-month') {
+                currentDate = new Date(formatter_time + '/01').getTime() //将时间转一下格式
+            } else {
+                currentDate = new Date(formatter_time).getTime() //将时间转一下格式
+            }
         }
+
         this.setState({
             formatter_time,
             currentDate
@@ -140,7 +146,6 @@ class BaseDatetimePicker extends Component {
      * @return { undefined }
      */
     formatter(type, value) {
-        // console.log(type, value);
         if (type === 'year') {
             return `${value}年`
         } else if (type === 'month') {

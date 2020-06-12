@@ -66,7 +66,6 @@ class BaseActionsheet extends Component {
         this.update()
     }
     update() {
-        console.log(this.props.default_index)
         this.setState({
             index: this.props.default_index
         })
@@ -92,6 +91,10 @@ class BaseActionsheet extends Component {
         this.props.onInput(false)
     }
 
+    Afterleave() {
+        console.log('离开')
+    }
+
     render() {
         return (
             <View className="DatetimePicker">
@@ -100,6 +103,7 @@ class BaseActionsheet extends Component {
                     position="bottom"
                     onClose={this.cancel.bind(this)}
                     onBefore-enter={this.update}
+                    onAfter-leave={this.Afterleave}
                 >
                     <van-picker
                         ref="picker"
