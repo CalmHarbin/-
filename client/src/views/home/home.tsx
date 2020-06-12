@@ -202,6 +202,7 @@ export default class Home extends Component {
             title: '加载中',
             mask: true
         })
+
         //调用云函数
         Taro.cloud
             .callFunction({

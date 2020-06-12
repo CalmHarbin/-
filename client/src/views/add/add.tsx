@@ -125,7 +125,7 @@ class Add extends Component {
                 // 传给云函数的参数
                 data: {
                     date: new Date(
-                        this.state.date.replace(/-/, '/') + '-01'
+                        this.state.date.replace(/-/, '/') + '/01'
                     ).getTime(), //时间存时间戳
                     deserved: Number(this.state.deserved),
                     realGain: Number(this.state.realGain),

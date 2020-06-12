@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
         db.collection("user")
             .where({
                 openid: openid,
-                date: _.gt(startTime).and(_.lt(endTime)),
+                date: _.gte(startTime).and(_.lte(endTime)),
             })
             .orderBy("date", "asc")
             .get()
