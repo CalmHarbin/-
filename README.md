@@ -7,7 +7,7 @@
 3. 了解云开发
 
 效果图
-<img src="https://img-blog.csdnimg.cn/20200616170130879.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" style="width: 150px" alt="添加数据页" /><img src="https://img-blog.csdnimg.cn/20200616170130860.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" style="width: 150px" alt="数据列表页" /><img src="https://img-blog.csdnimg.cn/20200616165720447.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" style="width: 150px" alt="数据统计页" />
+<img src="https://img-blog.csdnimg.cn/20200616170130879.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" width="150" alt="添加数据页" /><img src="https://img-blog.csdnimg.cn/20200616170130860.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" width="150" alt="数据列表页" /><img src="https://img-blog.csdnimg.cn/20200616165720447.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzMzMDgxODQx,size_16,color_FFFFFF,t_70" width="150" alt="数据统计页" />
 
 扫码体验
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200616171654674.jpg)
